@@ -28,7 +28,7 @@ def json_iter_parse(response_text):
     idx = 0
     while idx < len(response_text):
         obj, idx = decoder.raw_decode(response_text, idx)
-        yield obj   
+        yield obj
 
 
 class APISession(object):
@@ -51,7 +51,7 @@ class APISession(object):
 
         self.access_token = access_token
         self.scope = scope or ''
-        
+
         self.api_version = api_version
 
         self._timeout = timeout
@@ -146,7 +146,7 @@ class APISession(object):
 
                 # return make_handy(data['response'])
                 return data['response']
-            
+
         if INTERNAL_SERVER_ERROR in error_codes:  # invalid access token
             self.get_access_token()
             return self(method, timeout=timeout, **kwargs)
