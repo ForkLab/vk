@@ -3,6 +3,7 @@
 import re
 import time
 import warnings
+from urllib import urlencode
 
 from vk.utils import make_handy
 
@@ -66,18 +67,20 @@ class APISession(object):
             self.get_access_token()
 
     def get_access_token(self):
-
         session = requests.Session()
+
+        login_url = 'https://login.vk.com'
+        response = session.get('https://m.vk.com/')
+        form_action = re.findall(u'<form method="post" action="(.+?)" novalidate>', response.text)
+        if form_action:
+            login_url = form_action[0]
 
         # Login
         login_data = {
-            'act': 'login',
-            'utf8': '1',
             'email': self.user_login,
             'pass': self.user_password,
         }
-
-        response = session.post('https://login.vk.com', login_data)
+        response = session.post(login_url, login_data)
 
         if 'remixsid' in session.cookies:
             pass
@@ -94,8 +97,10 @@ class APISession(object):
             'client_id': self.app_id,
             'scope': self.scope,
             'display': 'mobile',
+            'redirect_uri': 'https://oauth.vk.com/blank.html'
         }
-        response = session.post('https://oauth.vk.com/authorize', oauth_data)
+        oauth_url = 'https://oauth.vk.com/authorize?{0}'.format(urlencode(oauth_data))
+        response = session.get(oauth_url)
 
         if 'access_token' not in response.url:
             form_action = re.findall(u'<form method="post" action="(.+?)">', response.text)
